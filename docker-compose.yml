@@ -77,6 +77,15 @@ services:
     volumes:
       - ./:/practica
 
+  mlflow:
+    image: python:3.10-slim
+    container_name: mlflow
+    command: bash -c "pip install mlflow==2.19.0 && mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts"
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+
   spark-master:
     build:
       context: .
@@ -147,3 +156,4 @@ services:
 volumes:
   minio_data:
   cassandra_data:
+  mlflow_data:

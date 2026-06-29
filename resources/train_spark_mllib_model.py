@@ -18,6 +18,13 @@ def main(base_path):
   from pyspark.sql import SparkSession
   spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 
+  # --- MLflow: conectar y empezar un run (opcional: trazabilidad del entrenamiento) ---
+  import mlflow
+  import mlflow.spark
+  mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "http://mlflow:5000"))
+  mlflow.set_experiment("flight_delay_prediction")
+  mlflow.start_run()
+
   from pyspark.sql.types import StringType, IntegerType, FloatType, DoubleType, DateType, TimestampType
   from pyspark.sql.types import StructType, StructField
   from pyspark.sql.functions import udf
@@ -153,6 +160,13 @@ def main(base_path):
   print("Accuracy = {}".format(accuracy))
 
   predictions.groupBy("Prediction").count().show()
+
+  # --- MLflow: registrar parámetros, métrica y modelo ---
+  mlflow.log_param("maxBins", 4657)
+  mlflow.log_param("maxMemoryInMB", 1024)
+  mlflow.log_metric("accuracy", accuracy)
+  mlflow.spark.log_model(model, "random_forest_model")
+  mlflow.end_run()
 
 if __name__ == "__main__":
   main(sys.argv[1])
