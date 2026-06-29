@@ -1,0 +1,11 @@
+FROM python:3.10-slim
+
+WORKDIR /practica
+
+RUN pip install --no-cache-dir flask flask-socketio kafka-python-ng cassandra-driver iso8601
+
+COPY . .
+
+EXPOSE 5001
+
+CMD ["python3", "resources/web/predict_flask.py"]

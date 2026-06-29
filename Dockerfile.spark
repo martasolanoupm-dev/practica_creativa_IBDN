@@ -1,0 +1,17 @@
+FROM spark:4.1.1-scala2.13-java17-ubuntu
+
+USER root
+
+# Python para PySpark (entrenamiento) y las librerías que usan los scripts
+RUN apt-get update && apt-get install -y python3 python3-pip && \
+    pip3 install --no-cache-dir numpy pymongo cassandra-driver mlflow
+
+# Drivers: S3A (para hablar con MinIO) e Iceberg
+RUN cd /opt/spark/jars && \
+    curl -O https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-4.0_2.13/1.10.1/iceberg-spark-runtime-4.0_2.13-1.10.1.jar && \
+    curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.4.2/hadoop-aws-3.4.2.jar && \
+    curl -O https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.367/aws-java-sdk-bundle-1.12.367.jar && \
+    curl -O https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.23.19/bundle-2.23.19.jar
+
+# Nuestra configuración (catálogo Iceberg + conexión a MinIO)
+COPY spark-defaults.conf /opt/spark/conf/spark-defaults.conf
