@@ -40,3 +40,7 @@ models/
 flight_prediction/target/
 flight_prediction/project/target/
 flight_prediction/.bsp/
+flink_prediction/target/
+data/flink_model.json
+flink_prediction/project/target/
+flink_prediction/project/project/
