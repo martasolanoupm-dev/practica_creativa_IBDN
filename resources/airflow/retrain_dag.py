@@ -19,12 +19,12 @@ SPARK_SUBMIT = (
 
 with DAG(
     dag_id="flight_delay_retraining",
-    description="Reentrena el modelo de retraso de vuelos con Spark",
     default_args=default_args,
-    start_date=datetime(2026, 1, 1),
-    schedule_interval=None,   # se dispara a mano desde la web
+    start_date=datetime(2026, 7, 9),
+    schedule_interval=None,
     catchup=False,
     tags=["ibdn", "spark", "mllib"],
+    dagrun_timeout=None,
 ) as dag:
 
     retrain = BashOperator(
