@@ -1,37 +1,41 @@
 // Conectar al servidor por WebSocket
 var socket = io();
 
-// Cuando llega una predicción para nuestra sala, mostrarla
+// Cuando llega una prediccion para nuestra sala, mostrarla
 socket.on('prediction', function(data) {
   renderPage(data);
 });
 
+// Generador de UUID v4 en el cliente
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0;
+    var v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 // Al enviar el formulario
 $( "#flight_delay_classification" ).submit(function( event ) {
-
-  // Evitar el envío normal del formulario
   event.preventDefault();
 
   var $form = $( this ),
     url = $form.attr( "action" );
 
-  // Enviar los datos del formulario por POST
-  var posting = $.post(
-    url,
-    $( "#flight_delay_classification" ).serialize()
-  );
+  // 1. Generar UUID en el navegador
+  var uuid = generateUUID();
 
-  // Cuando el servidor responde con el UUID, unirse a la sala de ese UUID
-  posting.done(function( data ) {
-    var response = JSON.parse(data);
-    if(response.status == "OK") {
-      $( "#result" ).empty().append( "Processing..." );
-      socket.emit('join', {uuid: response.id});
-    }
+  // 2. Unirse a la sala PRIMERO y esperar confirmacion del servidor
+  socket.emit('join', {uuid: uuid}, function() {
+    // 3. Solo cuando el servidor confirma el join, mandar el POST con el UUID
+    $( "#result" ).empty().append( "Processing..." );
+
+    var formData = $( "#flight_delay_classification" ).serialize() + "&UUID=" + encodeURIComponent(uuid);
+    $.post(url, formData);
   });
 });
 
-// Mostrar el resultado en la página según la categoría predicha
+// Mostrar el resultado en la pagina segun la categoria predicha
 function renderPage(response) {
   var displayMessage;
 

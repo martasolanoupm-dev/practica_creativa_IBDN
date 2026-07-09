@@ -62,8 +62,9 @@ def classify_flight_delays_realtime():
   prediction_features['Dest_index'] = 0.0
   prediction_features['Route_index'] = 0.0
 
-  # UUID único: identifica la predicción y será el nombre de la sala WebSocket
-  unique_id = str(uuid.uuid4())
+  # UUID: si el cliente lo envia (nuevo flujo, se unio ya a la room), usarlo.
+  # Si no (fallback), generar uno nuevo. Asegura que la room existe antes de publicar.
+  unique_id = request.form.get('UUID') or str(uuid.uuid4())
   prediction_features['UUID'] = unique_id
 
   producer.send(PREDICTION_TOPIC, json.dumps(prediction_features).encode())
@@ -76,6 +77,7 @@ def classify_flight_delays_realtime():
 def on_join(data):
   """El navegador se une a la sala con su UUID para recibir solo su respuesta"""
   join_room(data['uuid'])
+  return {"status": "joined"} 
 
 
 def kafka_consumer_thread():
